@@ -1,0 +1,13 @@
+{
+  "name": "NEXUS Life Command Center",
+  "short_name": "NEXUS",
+  "description": "Billionaire-Level Life Operating System — Track habits, complete missions, level up your life.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/public/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

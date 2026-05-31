@@ -1,0 +1,15 @@
+node_modules
+.env
+*.log
+.DS_Store
+dist
+
+
+# Local Netlify folder
+.netlify
+ANALYTICS_ENGINE.md
+DEPLOYMENT_GUIDE.md
+
+LICENSE
+docs
+FUTURE_SCALABILITY.md

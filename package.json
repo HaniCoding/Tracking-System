@@ -1,0 +1,13 @@
+{
+  "name": "nexus-life-command-center",
+  "version": "1.0.0",
+  "description": "Billionaire-Level Realtime Habit Tracker & Life Command Center",
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "npx netlify dev",
+    "build": "echo 'Static site - no build needed'",
+    "start": "npx http-server . -p 8080 -c-1"
+  },
+  "keywords": ["habit-tracker", "productivity", "google-sheets", "netlify"],
+  "license": "MIT"
+}
