@@ -9,6 +9,7 @@ import { renderMissionsPage } from './pages/missions.js';
 import { renderFocusPage } from './pages/focus.js';
 import { renderAnalyticsPage } from './pages/analytics.js';
 import { renderAdminPage } from './pages/admin.js';
+import { renderAuthPage } from './pages/auth.js';
 import { showToast } from './utils/helpers.js';
 import { effectsEngine } from './services/effectsEngine.js';
 import { soundEngine } from './services/soundEngine.js';
@@ -24,10 +25,17 @@ const PAGES = {
 };
 
 let currentPage = 'dashboard';
+let eventListenersInitialized = false;
 
 async function init() {
   try {
-    await authService.init();
+    const user = await authService.init();
+    if (!user) {
+      await renderAuthPage();
+      setupRouter();
+      return;
+    }
+
     await stateService.init();
 
     renderSidebar();
@@ -52,6 +60,22 @@ async function init() {
   }
 }
 
+async function initAfterAuth() {
+  await stateService.init();
+  const sidebar = document.getElementById('sidebar');
+  const bottomNav = document.getElementById('bottom-nav');
+  if (sidebar) sidebar.style.display = '';
+  if (bottomNav) bottomNav.style.display = '';
+  renderSidebar();
+  renderBottomNav();
+  showOnboarding();
+  setupEventListeners();
+  pwaService.init();
+  const hash = window.location.hash.replace('#', '') || 'dashboard';
+  currentPage = null;
+  navigateTo(hash);
+}
+
 function setupRouter() {
   window.addEventListener('hashchange', () => {
     const hash = window.location.hash.replace('#', '') || 'dashboard';
@@ -60,6 +84,8 @@ function setupRouter() {
 }
 
 function setupEventListeners() {
+  if (eventListenersInitialized) return;
+  eventListenersInitialized = true;
   window.addEventListener('achievement-unlocked', (e) => {
     showToast(`Achievement Unlocked: ${e.detail.name}`, 'success', '🏆 Achievement');
     soundEngine.achievement();
@@ -111,6 +137,22 @@ function setupEventListeners() {
   stateService.subscribe('ui.currentPage', (page) => {
     if (page !== currentPage) {
       currentPage = page;
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    const logoutBtn = e.target.closest('[data-logout]');
+    if (logoutBtn) {
+      logout();
+    }
+  });
+
+  authService.subscribe((user) => {
+    if (!user && document.querySelector('.auth-page')) {
+      return;
+    }
+    if (!user) {
+      logout();
     }
   });
 
@@ -204,6 +246,18 @@ function showOnboarding() {
   document.body.appendChild(overlay);
 }
 
+async function logout() {
+  authService.logout();
+  localStorage.removeItem('nexus_onboarding_done');
+  document.getElementById('sidebar').style.display = 'none';
+  document.getElementById('bottom-nav').style.display = 'none';
+  document.getElementById('main-content').style.marginLeft = '0';
+  document.getElementById('page-container').innerHTML = '';
+  await renderAuthPage();
+}
+
+window.logout = logout;
+
 document.addEventListener('DOMContentLoaded', init);
 
-export { navigateTo };
+export { navigateTo, logout, initAfterAuth };

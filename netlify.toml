@@ -7,8 +7,8 @@
   NODE_VERSION = "18"
 
 [dev]
-  command = "npm run dev"
   port = 8888
+  framework = "#static"
 
 [[redirects]]
   from = "/api/*"

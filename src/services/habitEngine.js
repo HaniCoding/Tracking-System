@@ -99,14 +99,14 @@ class HabitEngine {
     try {
       const now = new Date();
       const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
-      await sheetService.appendRow('DAILY_LOGS', [
-        `log_${Date.now()}`,
-        user.id,
-        habitId,
-        true,
-        today,
-        timeStr,
-      ]);
+      await sheetService.appendRow('DAILY_LOGS', {
+        id: `log_${Date.now()}`,
+        user_id: user.id,
+        habit_id: habitId,
+        completed: true,
+        date: today,
+        time: timeStr,
+      });
     } catch (error) {
       console.warn('Sheet sync failed, updating local state');
     }
@@ -183,7 +183,7 @@ class HabitEngine {
     };
     
     try {
-      await sheetService.appendRow('HABITS', Object.values(newHabit));
+      await sheetService.appendRow('HABITS', newHabit);
     } catch (error) {
       console.warn('Sheet sync failed, updating local state');
     }
@@ -208,7 +208,7 @@ class HabitEngine {
     };
     
     try {
-      await sheetService.updateRow('HABITS', index + 2, Object.values(updatedHabit));
+      await sheetService.updateRow('HABITS', index, updatedHabit);
     } catch (error) {
       console.warn('Sheet sync failed, updating local state');
     }

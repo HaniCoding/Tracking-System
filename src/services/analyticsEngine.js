@@ -268,19 +268,19 @@ class AnalyticsEngine {
       const score = this.calculateDisciplineScore();
       const today = new Date().toISOString().split('T')[0];
       
-      await sheetService.appendRow('ANALYTICS', [
-        `analytics_${Date.now()}`,
-        user.id,
-        today,
-        user.xp,
-        stateService.get('analytics').streak_days || this.calculateStreak(),
-        this.calculateProductivityScore(),
-        this.calculateWeeklyConsistency(),
-        stateService.get('analytics').deep_work_average || 0,
-        score,
-        stateService.get('dailyLogs').filter(l => l.completed).length,
-        0,
-      ]);
+      await sheetService.appendRow('ANALYTICS', {
+        id: `analytics_${Date.now()}`,
+        user_id: user.id,
+        date: today,
+        total_xp: user.xp,
+        streak_days: stateService.get('analytics').streak_days || this.calculateStreak(),
+        productivity_score: this.calculateProductivityScore(),
+        weekly_consistency: this.calculateWeeklyConsistency(),
+        deep_work_average: stateService.get('analytics').deep_work_average || 0,
+        discipline_score: score,
+        habits_completed_today: stateService.get('dailyLogs').filter(l => l.completed).length,
+        habits_count: 0,
+      });
     } catch (error) {
       console.warn('Analytics sync failed:', error.message);
     }

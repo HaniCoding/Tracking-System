@@ -13,3 +13,5 @@ DEPLOYMENT_GUIDE.md
 LICENSE
 docs
 FUTURE_SCALABILITY.md
+.env
+.env.example

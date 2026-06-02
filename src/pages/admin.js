@@ -256,7 +256,6 @@ export function openSheet(sheetName) {
 }
 
 window.navigateTo = (page) => {
-  stateService.setPage(page);
   window.location.hash = page;
 };
 

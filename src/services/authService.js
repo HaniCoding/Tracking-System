@@ -26,21 +26,22 @@ class AuthService {
       try {
         this.currentUser = JSON.parse(stored);
       } catch {
-        this.currentUser = { ...DEFAULT_USER };
+        this.currentUser = null;
       }
     } else {
-      this.currentUser = { ...DEFAULT_USER };
-      this.persistUser();
+      this.currentUser = null;
     }
 
-    try {
-      const users = await sheetService.getUsers(this.currentUser.id);
-      if (users && users.length > 0) {
-        this.currentUser = { ...this.currentUser, ...users[0] };
-        this.persistUser();
+    if (this.currentUser) {
+      try {
+        const userData = await sheetService.getUsers(this.currentUser.id);
+        if (userData) {
+          this.currentUser = { ...this.currentUser, ...userData };
+          this.persistUser();
+        }
+      } catch (error) {
+        console.warn('Using local user data:', error.message);
       }
-    } catch (error) {
-      console.warn('Using local user data:', error.message);
     }
 
     this.notifyListeners();
@@ -95,7 +96,7 @@ class AuthService {
         last_active: new Date().toISOString(),
       };
 
-      await sheetService.appendRow(SHEET_NAMES.USERS, Object.values(newUser));
+      await sheetService.appendRow(SHEET_NAMES.USERS, newUser);
       
       this.currentUser = newUser;
       this.persistUser();

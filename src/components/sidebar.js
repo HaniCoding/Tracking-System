@@ -1,4 +1,5 @@
 import stateService from '../services/stateService.js';
+import { authService } from '../services/authService.js';
 import { icons } from '../assets/icons.js';
 
 const NAV_ITEMS = [
@@ -7,7 +8,7 @@ const NAV_ITEMS = [
   { page: 'missions', label: 'Missions', icon: 'flag' },
   { page: 'focus', label: 'Focus', icon: 'clock' },
   { page: 'analytics', label: 'Analytics', icon: 'barChart' },
-  { page: 'admin', label: 'Admin', icon: 'shield' },
+  { page: 'admin', label: 'Admin', icon: 'shield', adminOnly: true },
 ];
 
 export function renderSidebar() {
@@ -16,6 +17,7 @@ export function renderSidebar() {
 
   const user = stateService.get('user');
   const currentPage = stateService.get('ui.currentPage');
+  const isAdmin = authService.isAdmin();
 
   sidebar.innerHTML = `
     <div class="sidebar-inner">
@@ -44,7 +46,7 @@ export function renderSidebar() {
       </div>
 
       <nav class="sidebar-nav">
-        ${NAV_ITEMS.map(item => `
+        ${NAV_ITEMS.filter(item => !item.adminOnly || isAdmin).map(item => `
           <a class="sidebar-link ${currentPage === item.page ? 'active' : ''}" 
              href="#${item.page}"
              data-nav="${item.page}">
@@ -56,8 +58,11 @@ export function renderSidebar() {
 
       <div class="sidebar-footer">
         <div class="sidebar-actions">
-          <button class="sidebar-action-btn" id="sound-toggle-btn" onclick="window.toggleSound()" data-tooltip="Toggle sound">
+          <button class="sidebar-action-btn tooltip" id="sound-toggle-btn" onclick="window.toggleSound()" data-tooltip="Toggle sound">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          </button>
+          <button class="sidebar-action-btn tooltip" data-logout data-tooltip="Sign out">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           </button>
         </div>
         <div class="sidebar-user">

@@ -112,15 +112,11 @@ class SheetService {
     if (this.pollingInterval) return;
     
     this.pollingInterval = setInterval(async () => {
-      try {
-        const changes = await this.checkForUpdates();
-        if (changes.length > 0) {
-          changes.forEach(({ sheet, data }) => {
-            this.notifySubscribers(sheet, data);
-          });
-        }
-      } catch (error) {
-        console.error('Polling error:', error);
+      const changes = await this.checkForUpdates();
+      if (changes.length > 0) {
+        changes.forEach(({ sheet, data }) => {
+          this.notifySubscribers(sheet, data);
+        });
       }
     }, interval);
   }
@@ -144,11 +140,23 @@ class SheetService {
   }
 
   normalizeRows(rawRows) {
-    if (!rawRows || rawRows.length < 2) return [];
-    
+    if (!rawRows || rawRows.length === 0) return [];
+
+    if (typeof rawRows[0] === 'object' && !Array.isArray(rawRows[0])) {
+      return rawRows.map(row => {
+        const obj = {};
+        for (const [key, value] of Object.entries(row)) {
+          obj[this.normalizeKey(key)] = value;
+        }
+        return obj;
+      });
+    }
+
+    if (rawRows.length < 2) return [];
+
     const headers = rawRows[0];
     const dataRows = rawRows.slice(1);
-    
+
     return dataRows.map(row => {
       const obj = {};
       headers.forEach((header, index) => {
@@ -167,6 +175,13 @@ class SheetService {
 
   formatRowForSheet(obj) {
     return Object.values(obj);
+  }
+
+  async updateUser(userId, updates) {
+    const users = await this.getUsers();
+    const index = users.findIndex(u => u.id === userId);
+    if (index === -1) throw new Error('User not found');
+    return this.updateRow(SHEET_NAMES.USERS, index, updates);
   }
 
   async getUsers(userId = null) {

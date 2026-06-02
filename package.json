@@ -5,9 +5,17 @@
   "main": "src/main.js",
   "scripts": {
     "dev": "npx netlify dev",
-    "build": "echo 'Static site - no build needed'",
+    "build": "node -e \"true\"",
     "start": "npx http-server . -p 8080 -c-1"
   },
-  "keywords": ["habit-tracker", "productivity", "google-sheets", "netlify"],
-  "license": "MIT"
+  "keywords": [
+    "habit-tracker",
+    "productivity",
+    "mongodb",
+    "netlify"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "mongodb": "^7.2.0"
+  }
 }

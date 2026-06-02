@@ -100,6 +100,7 @@ class StateService {
     try {
       const { authService } = await import('./authService.js');
       const user = await authService.init();
+      if (!user) throw new Error('No authenticated user');
       this.set('user', user);
 
       const [habits, missions] = await Promise.all([
@@ -114,22 +115,26 @@ class StateService {
       const dailyLogs = await sheetService.getDailyLogs(user.id, today);
       this.set('dailyLogs', dailyLogs);
 
-      const analytics = await sheetService.getAnalytics(user.id);
-      this.set('analytics', analytics);
+      const analyticsArr = await sheetService.getAnalytics(user.id);
+      this.set('analytics', analyticsArr.length > 0 ? analyticsArr[0] : {});
 
       this.setupRealtimeSync();
     } catch (error) {
       console.error('State initialization failed:', error);
-      this.loadMockData();
+      this.loadMockData(user);
     } finally {
       this.set('ui.loading', false);
     }
   }
 
-  loadMockData() {
+  loadMockData(fallbackUser = null) {
     const today = new Date();
     const dateStr = today.toISOString().split('T')[0];
-    
+
+    if (fallbackUser) {
+      this.set('user', fallbackUser);
+    }
+
     this.set('habits', [
       { id: 'h1', user_id: 'demo', title: 'Morning Meditation', category: 'mind', difficulty: 2, target: 1, frequency: 'daily', reward_xp: 20, status: 'active', created_at: dateStr, streak: 12 },
       { id: 'h2', user_id: 'demo', title: 'Read 30 Pages', category: 'learning', difficulty: 3, target: 1, frequency: 'daily', reward_xp: 30, status: 'active', created_at: dateStr, streak: 8 },
@@ -189,7 +194,7 @@ class StateService {
         this.set('dailyLogs', normalizedData);
         break;
       case 'ANALYTICS':
-        this.set('analytics', normalizedData);
+        this.set('analytics', normalizedData.length > 0 ? normalizedData[0] : {});
         break;
       default:
         break;
@@ -203,13 +208,13 @@ class StateService {
     );
 
     if (!existingLog) {
-      await sheetService.appendRow('DAILY_LOGS', [
-        `log_${Date.now()}`,
-        this.get('user').id,
-        habitId,
-        true,
-        today,
-      ]);
+      await sheetService.appendRow('DAILY_LOGS', {
+        id: `log_${Date.now()}`,
+        user_id: this.get('user').id,
+        habit_id: habitId,
+        completed: true,
+        date: today,
+      });
       
       this.update('dailyLogs', logs => [...logs, {
         id: `log_${Date.now()}`,
