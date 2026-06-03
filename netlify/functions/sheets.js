@@ -70,6 +70,7 @@ exports.handler = async (event) => {
 
     return { statusCode: 404, headers, body: JSON.stringify({ error: `Not found: ${action}` }) };
   } catch (error) {
+    console.error(`[sheets] ${event.httpMethod} ${event.path} failed:`, error.message);
     return {
       statusCode: 500,
       headers,
