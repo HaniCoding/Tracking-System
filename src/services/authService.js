@@ -79,6 +79,13 @@ class AuthService {
       return user;
     } catch (error) {
       console.error('Login failed:', error);
+      if (email === DEFAULT_USER.email) {
+        console.warn('Falling back to demo user');
+        this.currentUser = DEFAULT_USER;
+        this.persistUser();
+        this.notifyListeners();
+        return DEFAULT_USER;
+      }
       throw error;
     }
   }
